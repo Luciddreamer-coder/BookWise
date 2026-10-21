@@ -1,0 +1,29 @@
+# Source-control and local environment files
+.git/
+.gitignore
+.env
+.venv/
+venv/
+env/
+
+# Raw/large development datasets (processed data remains available to the image)
+data/raw/
+backend/notebooks/
+
+# Local databases, logs, caches, and Python build artifacts
+backend/bookwise.db
+*.sqlite3
+*.db
+*.log
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Frontend and editor development files are not needed by the backend image
+frontend/
+.vscode/
+.idea/

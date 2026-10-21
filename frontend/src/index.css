@@ -1,0 +1,135 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-serif: 'Playfair Display', 'Cormorant Garamond', Georgia, serif;
+    --font-heading: 'Cormorant Garamond', Georgia, serif;
+    --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    
+    --bg-warm: #FAF7F2;
+    --bg-cream: #F5EFE6;
+    --bg-card: #FFFFFF;
+    --accent-gold: #C5A059;
+    --accent-gold-dark: #9E7D3B;
+    --accent-burgundy: #722F37;
+    --ink-dark: #1E1B18;
+    --ink-muted: #57524D;
+    --border-sand: #E7DECF;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--bg-warm);
+    color: var(--ink-dark);
+    margin: 0;
+    padding: 0;
+  }
+
+  h1, h2, h3, .font-serif {
+    font-family: var(--font-serif);
+  }
+
+  .font-heading {
+    font-family: var(--font-heading);
+  }
+}
+
+/* Custom Scrollbar for cozy library feel */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #F4EFE6;
+}
+::-webkit-scrollbar-thumb {
+  background: #D8CEBD;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #C5A059;
+}
+
+/* Book Card 3D Depth & Spine Shadow */
+.book-cover-shadow {
+  box-shadow: 
+    -4px 4px 12px rgba(28, 25, 23, 0.12),
+    0 12px 24px rgba(28, 25, 23, 0.08),
+    inset 4px 0 6px -2px rgba(255, 255, 255, 0.4),
+    inset -4px 0 6px -2px rgba(0, 0, 0, 0.15);
+}
+
+.book-spine-effect {
+  position: relative;
+}
+.book-spine-effect::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 8px;
+  background: linear-gradient(to right, rgba(0,0,0,0.25), rgba(0,0,0,0.05) 50%, rgba(255,255,255,0.2) 80%, rgba(0,0,0,0.1));
+  z-index: 10;
+  pointer-events: none;
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+
+/* Subtle Paper Texture and Glow */
+.parchment-gradient {
+  background: linear-gradient(135deg, #FAF7F2 0%, #F5EFE6 100%);
+}
+
+.gold-gradient-border {
+  border-image: linear-gradient(to bottom right, #E7DECF, #C5A059, #E7DECF) 1;
+}
+
+/* Star rating golden shine */
+.star-filled {
+  color: #D4AF37;
+  filter: drop-shadow(0 1px 2px rgba(212, 175, 55, 0.3));
+}
+
+/* Theme tokens also adapt the original editorial palette; cover art is never
+   inverted. New reader tools inherit these same surfaces and text colors. */
+:root { color-scheme: light; }
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg-warm: #171a20;
+  --bg-cream: #20252d;
+  --bg-card: #252b34;
+  --ink-dark: #f3ecdf;
+  --ink-muted: #c9c1b4;
+  --border-sand: #4b4944;
+}
+[data-theme="dark"] :is(.bg-white, [class*="bg-white/"], [class*="bg-[#FAF7F2]"], [class*="bg-[#FFF8EB]"], [class*="bg-[#FAF5EB]"], [class*="bg-[#F5EFE6]"]) {
+  background-color: var(--bg-card);
+}
+[data-theme="dark"] :is([class*="bg-[#F2ECE1]"], [class*="bg-[#F0E8DA]"], [class*="bg-[#EFE8DE]"], [class*="bg-[#EDE5D8]"]) {
+  background-color: var(--bg-cream);
+}
+[data-theme="dark"] :is([class*="text-[#1E1B18]"], [class*="text-[#23201C]"], [class*="text-[#3D3730]"]) { color: var(--ink-dark); }
+[data-theme="dark"] :is([class*="text-[#57524D]"], [class*="text-[#7A6D5A]"], [class*="text-[#8C8274]"], [class*="text-[#6B6358]"], [class*="text-[#7D7364]"], [class*="text-[#775224]"]) { color: var(--ink-muted); }
+[data-theme="dark"] :is([class*="border-[#E"], [class*="border-[#D8CEBD]"]) { border-color: var(--border-sand); }
+[data-theme="dark"] :is([class*="text-[#9E7D3B]"], [class*="text-[#8C7040]"]) { color: #e4bf78; }
+[data-theme="dark"] :is([class*="text-[#722F37]"], .text-red-800) { color: #ffb2b8; }
+[data-theme="dark"] :is([class*="text-[#2D6A4F]"], .text-emerald-600) { color: #8cd9ad; }
+[data-theme="dark"] .text-amber-800 { color: #e4bf78; }
+[data-theme="dark"] :is(.bg-red-50, [class*="bg-[#FFF4F2]"]) { background-color: #4b242c; color: #ffccd0; }
+[data-theme="dark"] :is([class*="bg-[#C5A059]"], [class*="bg-[#D4AF37]"]) { color: #17120c; }
+[data-theme="dark"] input::placeholder, [data-theme="dark"] textarea::placeholder { color: #a9a196; }
+[data-theme="dark"] ::-webkit-scrollbar-track { background: #20252d; }
+[data-theme="dark"] ::-webkit-scrollbar-thumb { background: #625b50; }
+button, a, input, textarea, select, summary { scroll-margin-block: 7rem; }
+h1, h2, h3 { overflow-wrap: anywhere; }
+:focus-visible { outline: 2px solid var(--accent-gold); outline-offset: 3px; }
+.mobile-bottom-nav { padding-bottom: max(0.5rem, env(safe-area-inset-bottom)); }
+@media (max-width: 767px) {
+  body { padding-bottom: calc(5rem + env(safe-area-inset-bottom)); }
+  [role="status"].fixed { bottom: calc(5.5rem + env(safe-area-inset-bottom)); }
+  .book-comparison { margin-bottom: 1.5rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
