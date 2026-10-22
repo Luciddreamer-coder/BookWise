@@ -118,9 +118,13 @@ def create_app(config_class=Config):
         finally:
             db.close()
             
-    # Auto-initialize database schema and seed books if needed
-    with app.app_context():
-        init_db()
+    # Keep database initialization out of production web-worker startup.
+    # Render's free instances have limited memory, and init_db imports pandas
+    # and may seed the catalogue. Run `python -m backend.migrate` separately
+    # when provisioning or changing the production database.
+    if os.getenv("APP_ENV", "development").lower() != "production":
+        with app.app_context():
+            init_db()
         
     return app
 
