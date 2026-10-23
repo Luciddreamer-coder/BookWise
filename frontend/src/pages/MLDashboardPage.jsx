@@ -328,9 +328,16 @@ export default function MLDashboardPage({ currentUser, onSelectBook, onSignIn })
                       </p>
                     </div>
 
-                    {/* Book Cards */}
-                    <div className="space-y-2.5">
-                      {mInfo.recommendations?.slice(0, 4).map((rec, i) => (
+                     {/* Book Cards */}
+                     <div className="space-y-2.5">
+                       {!mInfo.recommendations?.length && (
+                         <div className="rounded-lg border border-dashed border-[#D8CEBD] bg-[#FAF7F2] px-3 py-4 text-center text-[11px] leading-relaxed text-[#7A6D5A]">
+                           {mKey === 'model_3_collaborative'
+                             ? 'No collaborative recommendations yet. Rate a few books so SVD can learn your reader profile.'
+                             : 'No recommendations available for this model.'}
+                         </div>
+                       )}
+                       {mInfo.recommendations?.slice(0, 4).map((rec, i) => (
                         <div 
                           key={rec.book_id || i}
                           onClick={() => onSelectBook && onSelectBook(rec)}

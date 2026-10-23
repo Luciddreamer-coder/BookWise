@@ -112,7 +112,10 @@ class HybridRecommender:
         cf_candidates = []
         if user_id:
             cf_candidates = self.collaborative_model.recommend_for_user(
-                user_id, n=candidate_pool_size, rated_book_ids=rated_book_ids
+                user_id,
+                n=candidate_pool_size,
+                rated_book_ids=rated_book_ids,
+                user_ratings=user_ratings,
             )
         cf_dict = {item["book_id"]: item for item in cf_candidates}
         
@@ -277,13 +280,22 @@ class HybridRecommender:
         # 2. Content-Based (similar to book_id)
         cb = self.content_model.recommend_similar_books(book_id=book_id, n=n)
         
+        # Use the user's actual persisted/history ratings for both CF fold-in
+        # and hybrid scoring. The anchor book is only used by content-based
+        # filtering above.
+        actual_ratings = self._get_user_ratings(user_id)
+
         # 3. Collaborative (for user_id)
-        cf = self.collaborative_model.recommend_for_user(user_id=user_id, n=n)
-        
+        cf = self.collaborative_model.recommend_for_user(
+            user_id=user_id,
+            n=n,
+            rated_book_ids={int(r["book_id"]) for r in actual_ratings if "book_id" in r},
+            user_ratings=actual_ratings,
+        )
+
         # 4. Hybrid (for user_id), using the user's actual persisted/history
         # ratings.  The anchor book is only used for the content model above;
         # it must never be treated as an implicit five-star rating.
-        actual_ratings = self._get_user_ratings(user_id)
         hybrid = self.recommend(user_id=user_id, user_ratings=actual_ratings, n=n, alpha=0.55)
         
         return {

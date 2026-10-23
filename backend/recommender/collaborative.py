@@ -152,11 +152,19 @@ class CollaborativeRecommender:
         # Clip to valid rating range [1.0, 5.0]
         return float(np.clip(pred, 1.0, 5.0))
 
-    def recommend_for_user(self, user_id: int, n: int = 10, rated_book_ids: set = None):
+    def recommend_for_user(
+        self,
+        user_id: int,
+        n: int = 10,
+        rated_book_ids: set = None,
+        user_ratings: list[dict] = None,
+    ):
         """Generate top N collaborative recommendations for a specific user ID."""
         user_id = int(user_id)
         if rated_book_ids is None:
             rated_book_ids = set()
+        if user_ratings is None:
+            user_ratings = []
 
         # If user is in latent factor space
         if self.user_factors is not None and user_id in self.user_id_to_idx:
@@ -190,7 +198,57 @@ class CollaborativeRecommender:
                         break
             return results
 
-        # Fallback for new user or unseen user in CF: return top books by item bias
+        # Cold-start fold-in: estimate a new user's latent vector from the
+        # ratings they have already submitted. This uses the existing SVD book
+        # factors, so a new application user does not require a full retrain.
+        if self.book_factors is not None and user_ratings:
+            known_ratings = []
+            for rating in user_ratings:
+                try:
+                    book_id = int(rating["book_id"])
+                    value = float(rating["rating"])
+                except (KeyError, TypeError, ValueError):
+                    continue
+                if book_id in self.book_id_to_idx:
+                    known_ratings.append((book_id, value))
+
+            if known_ratings:
+                rated_indices = [self.book_id_to_idx[book_id] for book_id, _ in known_ratings]
+                design = self.book_factors[rated_indices]
+                targets = np.array(
+                    [
+                        value - self.mu - self.book_biases.get(book_id, 0.0)
+                        for book_id, value in known_ratings
+                    ],
+                    dtype=np.float32,
+                )
+                user_vector = np.linalg.lstsq(design, targets, rcond=None)[0]
+                scores = self.mu + np.array(
+                    [self.book_biases.get(self.idx_to_book_id[i], 0.0) for i in range(len(self.idx_to_book_id))]
+                ) + np.dot(self.book_factors, user_vector)
+
+                results = []
+                for b_idx in np.argsort(scores)[::-1]:
+                    b_id = self.idx_to_book_id[b_idx]
+                    if b_id in rated_book_ids:
+                        continue
+                    b_row = self.books_df.loc[self.books_df["book_id"] == b_id] if self.books_df is not None else pd.DataFrame()
+                    if b_row.empty:
+                        continue
+                    score = float(np.clip(scores[b_idx], 1.0, 5.0))
+                    rec = b_row.iloc[0].to_dict()
+                    rec["predicted_rating"] = round(score, 2)
+                    rec["score"] = round(score / 5.0, 3)
+                    rec["algorithm"] = "Collaborative Filtering (SVD cold-start fold-in)"
+                    rec["explanation"] = (
+                        f"Estimated from your {len(known_ratings)} rating(s) and learned reader patterns."
+                    )
+                    results.append(rec)
+                    if len(results) >= n:
+                        break
+                return results
+
+        # No usable profile yet: there is not enough evidence for CF.
         return []
 
     def get_similar_books_cf(self, book_id: int, n: int = 10):
